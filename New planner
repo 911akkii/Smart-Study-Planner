@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B.Tech Smart Study Planner</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/latest/umd/lucide.min.js"></script>
+</head>
+<body class="m-0 p-0">
+    <div id="root"></div>
+    <script>
+        const { useState, useEffect } = React;
+        const { BarChart3, BookOpen, Calendar, Clock, Target, FileText, AlertCircle, Plus, X, Menu, Moon, Sun, CheckCircle, Trash2, Edit2, Play, Pause, RotateCcw, TrendingUp } = lucide;
+
+        const StudyPlanner = () => {
+            const [darkMode, setDarkMode] = useState(false);
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [branch, setBranch] = useState('CS');
+            const [showBranchModal, setShowBranchModal] = useState(!localStorage.getItem('userBranch'));
+            const [sidebarOpen, setSidebarOpen] = useState(true);
+            const [todos, setTodos] = useState([]);
+            const [newTodo, setNewTodo] = useState('');
+            const [classes, setClasses] = useState({});
+            const [newClass, setNewClass] = useState({ day: 'Monday', type: 'Theory', subject: '', time: '' });
+            const [pomodoroRunning, setPomodoroRunning] = useState(false);
+            const [pomodoroTime, setPomodoroTime] = useState(1500);
+            const [pomodoroSession, setPomodoroSession] = useState('work');
+            const [totalFocusHours, setTotalFocusHours] = useState(0);
+            const [attendanceData, setAttendanceData] = useState({});
+            const [examDate, setExamDate] = useState('');
+            const [examSubject, setExamSubject] = useState('');
+
+            const branches = ['CS', 'ECE', 'EE', 'Civil'];
+            const branchColors = {
+                CS: 'from-blue-500 to-purple-600',
+                ECE: 'from-amber-500 to-orange-600',
+                EE: 'from-red-500 to-pink-600',
+                Civil: 'from-green-500 to-teal-600'
+            };
+            const syllabusTopics = {
+                CS: ['Data Structures', 'DBMS', 'Algorithms', 'Networks', 'OS', 'Compiler Design'],
+                ECE: ['Circuit Theory', 'Signals & Systems', 'Digital Electronics', 'Electromagnetics', 'Communication Systems'],
+                EE: ['Power Systems', 'Electrical Machines', 'Control Systems', 'Power Electronics', 'Grid Operations'],
+                Civil: ['Mechanics', 'RCC Design', 'Steel Design', 'Surveying', 'Hydraulics', 'Geotechnical Engineering']
+            };
+
+            useEffect(() => {
+                if (localStorage.getItem('userBranch')) {
+                    setBranch(localStorage.getItem('userBranch'));
+                    setShowBranchModal(false);
+                }
+            }, []);
+
+            useEffect(() => {
+                let interval;
+                if (pomodoroRunning && pomodoroTime > 0) {
+                    interval = setInterval(() => {
+                        setPomodoroTime(time => time - 1);
+                    }, 1000);
+                } else if (pomodoroTime === 0) {
+                    if (pomodoroSession === 'work') {
+                        setPomodoroSession('break');
+                        setPomodoroTime(300);
+                        alert('Work session complete! Time for a break.');
+                    } else {
+                        setPomodoroSession('work');
+                        setPomodoroTime(1500);
+                        setTotalFocusHours(prev => prev + 0.25);
+                        alert('Break complete! Ready for another session?');
+                    }
+                }
+                return () => clearInterval(interval);
+            }, [pomodoroRunning, pomodoroTime, pomodoroSession]);
+
+            const handleSelectBranch = (selectedBranch) => {
+                setBranch(selectedBranch);
+                localStorage.setItem('userBranch', selectedBranch);
+                setShowBranchModal(false);
+            };
+
+            const addTodo = () => {
+                if (newTodo.trim()) {
+                    setTodos([...todos, { id: Date.now(), text: newTodo, completed: false }]);
+                    setNewTodo('');
+                }
+            };
+
+            const toggleTodo = (id) => {
+                setTodos(todos.map(todo => todo.id === id ? { ...todo, completed: !todo.completed } : todo));
+            };
+
+            const deleteTodo = (id) => {
+                setTodos(todos.filter(todo => todo.id !== id));
+            };
+
+            const addClass = () => {
+                if (newClass.subject && newClass.time) {
+                    setClasses({
+                        ...classes,
+                        [newClass.day]: [...(classes[newClass.day] || []), { id: Date.now(), ...newClass }]
+                    });
+                    setNewClass({ day: 'Monday', type: 'Theory', subject: '', time: '' });
+                }
+            };
+
+            const deleteClass = (day, id) => {
+                setClasses({
+                    ...classes,
+                    [day]: classes[day].filter(cls => cls.id !== id)
+                });
+            };
+
+            const formatTime = (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            };
+
+            const completedTodos = todos.filter(t => t.completed).length;
+            const progressPercentage = todos.length > 0 ? (completedTodos / todos.length) * 100 : 0;
+
+            const bgClass = darkMode ? 'bg-gray-900 text-white' : 'bg-white text-gray-900';
+            const cardClass = darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200';
+            const inputClass = darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500';
+
+            return (
+                <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900 text-white' : 'bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900'} transition-colors duration-300`}>
+                    {/* Header */}
+                    <header className={`${cardClass} border-b backdrop-blur-md bg-opacity-80 sticky top-0 z-40 transition-colors`}>
+                        <div className="flex items-center justify-between px-4 py-4 md:px-6">
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                                    className="md:hidden p-2 hover:bg-opacity-50 rounded-lg"
+                                >
+                                    <Menu size={24} />
+                                </button>
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-lg bg-gradient-to-br ${branchColors[branch]}`}>
+                                        <BookOpen size={24} className="text-white" />
+                                    </div>
+                                    <h1 className="text-xl md:text-2xl font-bold">Study Planner</h1>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setDarkMode(!darkMode)}
+                                className={`p-2 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-200'} hover:opacity-80 transition-opacity`}
+                            >
+                                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+                            </button>
+                        </div>
+                    </header>
+
+                    {/* Branch Selection Modal */}
+                    {showBranchModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className={`${cardClass} border rounded-2xl p-8 max-w-md w-full backdrop-blur-lg`}>
+                                <h2 className="text-2xl font-bold mb-6">Select Your Branch</h2>
+                                <p className={`mb-6 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Choose your engineering branch to personalize your study plan</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {branches.map(b => (
+                                        <button
+                                            key={b}
+                                            onClick={() => handleSelectBranch(b)}
+                                            className={`p-4 rounded-lg border-2 transition-all font-semibold ${
+                                                b === branch
+                                                    ? `border-blue-500 bg-gradient-to-br ${branchColors[b]} text-white`
+                                                    : `border-gray-300 hover:border-blue-500 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`
+                                            }`}
+                                        >
+                                            {b}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex flex-1 overflow-hidden">
+                        {/* Sidebar */}
+                        <aside className={`${sidebarOpen ? 'w-64' : 'w-0'} ${cardClass} border-r transition-all duration-300 overflow-hidden md:w-64 md:block hidden`}>
+                            <nav className="p-6 space-y-2">
+                                {[
+                                    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+                                    { id: 'schedule', label: 'Class Schedule', icon: Calendar },
+                                    { id: 'planner', label: 'Daily Planner', icon: Target },
+                                    { id: 'pomodoro', label: 'Pomodoro Timer', icon: Clock },
+                                    { id: 'attendance', label: 'Attendance Tracker', icon: CheckCircle },
+                                    { id: 'exam', label: 'Exam Strategy', icon: TrendingUp },
+                                    { id: 'resources', label: 'Resource Vault', icon: FileText }
+                                ].map(item => {
+                                    const Icon = item.icon;
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
+                                            className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 ${
+                                                activeTab === item.id
+                                                    ? `bg-gradient-to-r ${branchColors[branch]} text-white`
+                                                    : `hover:${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`
+                                            }`}
+                                        >
+                                            <Icon size={20} />
+                                            <span>{item.label}</span>
+                                        </button>
+                                    );
+                                })}
+                            </nav>
+                        </aside>
+
+                        {/* Main Content */}
+                        <main className="flex-1 overflow-auto">
+                            <div className="p-4 md:p-8 max-w-6xl mx-auto">
+                                {/* Dashboard */}
+                                {activeTab === 'dashboard' && (
+                                    <div className="space-y-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className={`${cardClass} border rounded-xl p-6 backdrop-blur-md bg-opacity-80`}>
+                                                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Branch</p>
+                                                <p className="text-3xl font-bold">{branch}</p>
+                                            </div>
+                                            <div className={`${cardClass} border rounded-xl p-6 backdrop-blur-md bg-opacity-80`}>
+                                                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Tasks Completed</p>
+                                                <p className="text-3xl font-bold">{completedTodos}/{todos.length}</p>
+                                            </div>
+                                            <div className={`${cardClass} border rounded-xl p-6 backdrop-blur-md bg-opacity-80`}>
+                                                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Focus Hours</p>
+                                                <p className="text-3xl font-bold">{totalFocusHours.toFixed(2)}h</p>
+                                            </div>
+                                        </div>
+
+                                        <div className={`${cardClass} border rounded-xl p-6 backdrop-blur-md bg-opacity-80`}>
+                                            <h2 className="text-xl font-bold mb-4">Today's Goals & Progress</h2>
+                                            <div className="mb-4">
+                                                <div className="flex justify-between mb-2">
+                                                    <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Weekly Target Progress</span>
+                                                    <span className="font-semibold">{Math.round(progressPercentage)}%</span>
+                                                </div>
+                                                <div className={`w-full h-3 rounded-full ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
+                                                    <div className={`h-full bg-gradient-to-r ${branchColors[branch]} transition-all`} style={{ width: `${progressPercentage}%` }}></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className={`${cardClass} border rounded-xl p-6 backdrop-blur-md bg-opacity-80`}>
+                                            <h2 className="text-xl font-bold mb-4">Suggested Topics</h2>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                                {syllabusTopics[branch].slice(0, 3).map((topic, idx) => (
+                                                    <div key={idx} className={`p-3 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} hover:opacity-80 transition-opacity cursor-pointer`}>
+                                                        <p className="font-medium">{topic}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Class Schedule */}
+                                {activeTab === 'schedule' && (
+                                    <div className="space-y-6">
+                                        <div className={`${cardClass} border rounded-xl p-6 backdrop-blur-md bg-opacity-80`}>
+                                            <h2 className="text-xl font-bold mb-6">Add New Class</h2>
+                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                                <select
+                                                    value={newClass.day}
+                                                    onChange={(e) => setNewClass({ ...newClass, day: e.target.value })}
+                                                    className={`${inputClass} border rounded-lg px-4 py-2`}
+                                                >
+                                                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
+                                                        <option key={day} value={day}>{day}</option>
+                                                    ))}
+                                                </select>
+                                                <select
+                                                    value={newClass.type}
+                                                    onChange={(e) => setNewClass({ ...newClass, type: e.target.value })}
+                                                    className={`${inputClass} border rounded-lg px-4 py-2`}
+                                                >
+                                                    <option value="Theory">Theory</option>
+                                                    <option value="Lab">Lab</option>
+                                                    <option value="Tutorial">Tutorial</option>
+                                                </select>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Subject"
+                                                    value={newClass.subject}
+                                                    onChange={(e) => setNewClass({ ...newClass, subject: e.target.value })}
+                                                    className={`${inputClass} border rounded-lg px-4 py-2`}
+                                                />
+                                                <button
+                                                    onClick={addClass}
+                                                    className={`bg-gradient-to-r ${branchColors[branch]} text-white font-semibold rounded-lg px-6 py-2 hover:opacity-90 transition-opacity flex items-center justify-center gap-2`}
+                                                >
+                                                    <Plus size={20} /> Add
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
+                                                <div key={day} className={`${cardClass} border rounded-xl p-4 backdrop-blur-md bg-opacity-80`}>
+                                                    <h3 className="font-bold mb-3">{day}</h3>
+                                                    {(classes[day] || []).map(cls => (
+                                                        <div key={cls.id} className={`p-3 mb-2 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} flex justify-between items-start`}>
+                                                            <div>
+                                                                <p className="font-semibold">{cls.subject}</p>
+                                                                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{cls.type} • {cls.time}</p>
+                                                            </div>
+                                                            <button onClick={() => deleteClass(day, cls.id)} className="text-red-500 hover:text-red-700">
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                    {(!classes[day] || classes[day].length === 0) && (
+                                                        <p className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>No classes scheduled</p>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Daily Planner */}
+                                {activeTab === 'planner' && (
+                                    <div className={`${cardClass} border rounded-xl p-6 backdrop-blur-md bg-opacity-80`}>
+                                        <h2 className="text-2xl font-bold mb-6">Daily Planner</h2>
+                                        <div className="mb-6">
+                                            <div className="flex gap-3 mb-4">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Add a new task..."
+                                                    value={newTodo}
+                                                    onChange={(e) => setNewTodo(e.target.value)}
+                                                    onKeyPress={(e) => e.key === 'Enter' && addTodo()}
+                                                    className={`${inputClass} border rounded-lg px-4 py-3 flex-1`}
+                                                />
+                                                <button
+                                                    onClick={addTodo}
+                                                    className={`bg-gradient-to-r ${branchColors[branch]} text-white font-semibold rounded-lg px-6 py-3 hover:opacity-90 transition-opacity`}
+                                                >
+                                                    <Plus size={20} />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            {todos.map(todo => (
+                                                <div key={todo.id} className={`flex items-center gap-4 p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} hover:opacity-80 transition-opacity`}>
+                                                    <button
+                                                        onClick={() => toggleTodo(todo.id)}
+                                                        className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                                            todo.completed
+                                                                ? `bg-gradient-to-r ${branchColors[branch]} border-transparent`
+                                                                : darkMode ? 'border-gray-500' : 'border-gray-300'
+                                                        }`}
+                                                    >
+                                                        {todo.completed && <CheckCircle size={16} className="text-white" />}
+                                                    </button>
+                                                    <span className={`flex-1 ${todo.completed ? 'line-through opacity-50' : ''}`}>{todo.text}</span>
+                                                    <button
+                                                        onClick={() => deleteTodo(todo.id)}
+                                                        className="text-red-500 hover:text-red-700"
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Pomodoro Timer */}
+                                {activeTab === 'pomodoro' && (
+                                    <div className={`${cardClass} border rounded-xl p-6 backdrop-blur-md bg-opacity-80 max-w-2xl mx-auto`}>
+                                        <h2 className="text-2xl font-bold mb-8 text-center">Pomodoro Focus Timer</h2>
+                                        <div className="text-center mb-8">
+                                            <div className={`text-7xl font-bold mb-4 font-mono ${pomodoroSession === 'work' ? 'text-blue-500' : 'text-green-500'}`}>
+                                                {formatTime(pomodoroTime)}
+                                            </div>
+                                            <p className="text-xl font-semibold mb-4">{pomodoroSession === 'work' ? 'Work Session' : 'Break Time'}</p>
+                                            <div className="flex gap-4 justify-center">
+                                                <button
+                                                    onClick={() => setPomodoroRunning(!pomodoroRunning)}
+                                                    className={`bg-gradient-to-r ${branchColors[branch]} text-white font-bold rounded-full w-16 h-16 flex items-center justify-center hover:opacity-90 transition-opacity`}
+                                                >
+                                                    {pomodoroRunning ? <Pause size={24} /> : <Play size={24} />}
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setPomodoroRunning(false);
+                                                        setPomodoroTime(pomodoroSession === 'work' ? 1500 : 300);
+                                                    }}
+                                                    className={`bg-gray-500 text-white font-bold rounded-full w-16 h-16 flex items-center justify-center hover:opacity-90 transition-opacity`}
+                                                >
+                                                    <RotateCcw size={24} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg p-4`}>
+                                            <p className={`text-sm font-semibold mb-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Focus Time</p>
+                                            <p className="text-3xl font-bold">{totalFocusHours.toFixed(2)} hours</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Attendance Tracker */}
+                                {activeTab === 'attendance' && (
+                                    <div className="space-y-6">
+                                        <div className={`${cardClass} border rounded-xl p-6 backdrop-blur-md bg-opacity-80`}>
+                                            <h2 className="text-2xl font-bold mb-6">75% Attendance Calculator</h2>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                {syllabusTopics[branch].map((subject, idx) => {
+                                                    const attended = attendanceData[subject]?.attended || 0;
+                                                    const total = attendanceData[subject]?.total || 0;
+                                                    const percentage = total > 0 ? (attended / total) * 100 : 0;
+                                                    const canMiss = total > 0 ? Math.floor((attended - total * 0.75) / 0.25) : 0;
+
+                                                    return (
+                                                        <div key={idx} className={`${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg p-4`}>
+                                                            <p className="font-semibold mb-3">{subject}</p>
+                                                            <div className="space-y-3">
+                                                                <div className="flex gap-2">
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder="Attended"
+                                                                        value={attended || ''}
+                                                                        onChange={(e) => setAttendanceData({
+                                                                            ...attendanceData,
+                                                                            [subject]: { ...attendanceData[subject], attended: parseInt(e.target.value) || 0 }
+                                                                        })}
+                                                                        className={`${inputClass} border rounded w-1/2 px-3 py-2 text-sm`}
+                                                                    />
+                                                                    <input
+                                                                        type="number"
+                                                                        placeholder="Total"
+                                                                        value={total || ''}
+                                                                        onChange={(e) => setAttendanceData({
+                                                                            ...attendanceData,
+                                                                            [subject]: { ...attendanceData[subject], total: parseInt(e.target.value) || 0 }
+                                                                        })}
+                                                                        className={`${inputClass} border rounded w-1/2 px-3 py-2 text-sm`}
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <div className="flex justify-between mb-1">
+                                                                        <span className="text-sm">Attendance</span>
+                                                                        <span className={`font-bold ${percentage >= 75 ? 'text-green-500' : 'text-red-500'}`}>{percentage.toFixed(1)}%</span>
+                                                                    </div>
+                                                                    <div className={`w-full h-2 rounded-full ${darkMode ? 'bg-gray-600' : 'bg-gray-300'} overflow-hidden`}>
+                                                                        <div className={`h-full ${percentage >= 75 ? 'bg-green-500' : 'bg-red-500'}`} style={{ width: `${Math.min(percentage, 100)}%` }}></div>
+                                                                    </div>
+                                                                </div>
+                                                                {total > 0 && (
+                                                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                                        {canMiss >= 0 ? `Can miss ${canMiss} more classes` : 'Need to attend more classes'}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Exam Strategy */}
+                                {activeTab === 'exam' && (
+                                    <div className={`${cardClass} border rounded-xl p-6 backdrop-blur-md bg-opacity-80`}>
+                                        <h2 className="text-2xl font-bold mb-6">Exam Strategy AI</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                            <div>
+                                                <label className={`block font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Exam Date</label>
+                                                <input
+                                                    type="date"
+                                                    value={examDate}
+                                                    onChange={(e) => setExamDate(e.target.value)}
+                                                    className={`${inputClass} border rounded-lg w-full px-4 py-2`}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className={`block font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Subject</label>
+                                                <select
+                                                    value={examSubject}
+                                                    onChange={(e) => setExamSubject(e.target.value)}
+                                                    className={`${inputClass} border rounded-lg w-full px-4 py-2`}
+                                                >
+                                                    <option value="">Select a subject</option>
+                                                    {syllabusTopics[branch].map(topic => (
+                                                        <option key={topic} value={topic}>{topic}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        {examDate && examSubject && (
+                                            <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg p-6`}>
+                                                <h3 className="font-bold text-lg mb-4">Generated Study Plan</h3>
+                                                <div className="space-y-3">
+                                                    <div className={`${darkMode ? 'bg-gray-600' : 'bg-white'} rounded-lg p-4 border ${darkMode ? 'border-gray-500' : 'border-gray-200'}`}>
+                                                        <p className="font-semibold mb-2">📚 Study Schedule</p>
+                                                        <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Dedicate 2-3 hours daily to {examSubject}</p>
+                                                    </div>
+                                                    <div className={`${darkMode ? 'bg-gray-600' : 'bg-white'} rounded-lg p-4 border ${darkMode ? 'border-gray-500' : 'border-gray-200'}`}>
+                                                        <p className="font-semibold mb-2">⏱️ Daily Breakdown</p>
+                                                        <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Theory (60 min) → Practice (60 min) → Review (30 min)</p>
+                                                    </div>
+                                                    <div className={`${darkMode ? 'bg-gray-600' : 'bg-white'} rounded-lg p-4 border ${darkMode ? 'border-gray-500' : 'border-gray-200'}`}>
+                                                        <p className="font-semibold mb-2">📋 Topics to Cover</p>
+                                                        <p className={darkMode ? 'text-gray-300' : 'text-gray-600'}>Prioritize core concepts first, then advanced topics</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Resource Vault */}
+                                {activeTab === 'resources' && (
+                                    <div className={`${cardClass} border rounded-xl p-6 backdrop-blur-md bg-opacity-80`}>
+                                        <h2 className="text-2xl font-bold mb-6">Resource Vault</h2>
+                                        <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg p-8 text-center mb-6 border-2 border-dashed`}>
+                                            <FileText size={48} className="mx-auto mb-3 opacity-50" />
+                                            <p className="font-semibold mb-2">Upload Resources</p>
+                                            <p className={`text-sm mb-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Upload PDF notes, PYQs, and assignments for {branch}</p>
+                                            <button className={`bg-gradient-to-r ${branchColors[branch]} text-white font-semibold rounded-lg px-6 py-2 hover:opacity-90 transition-opacity`}>
+                                                Choose Files
+                                            </button>
+                                        </div>
+                                        <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                            <p>No resources uploaded yet</p>
+                                            <p className="text-sm">Start by uploading your study materials</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </main>
+                    </div>
+
+                    {/* Footer */}
+                    <footer className={`${cardClass} border-t backdrop-blur-md bg-opacity-80 sticky bottom-0 text-center py-4 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} transition-colors`}>
+                        Developed by <span className="font-bold">DEVELOPER AKKI</span> • B.Tech Smart Study Planner
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<StudyPlanner />);
+    </script>
+</body>
+</html>
