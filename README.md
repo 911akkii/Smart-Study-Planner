@@ -1,23 +1,1975 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>B.Tech Smart Study Planner</title>
-    <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/latest/umd/lucide.min.js"></script>
-</head>
-<body class="m-0 p-0">
-    <div id="root"></div>
-    <script>
-        const { useState, useEffect } = React;
-        const { BarChart3, BookOpen, Calendar, Clock, Target, FileText, AlertCircle, Plus, X, Menu, Moon, Sun, CheckCircle, Trash2, Edit2, Play, Pause, RotateCcw, TrendingUp } = lucide;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B.Tech Smart Study Planner | Developer Akki</title>
 
-        const StudyPlanner = () => {
-            const [darkMode, setDarkMode] = useState(false);
-            const [activeTab, setActiveTab] = useState('dashboard');
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+:root{
+    --primary:#7c3aed;
+    --secondary:#06b6d4;
+    --accent:#a78bfa;
+    --card:rgba(15,23,42,.68);
+    --card2:rgba(255,255,255,.08);
+    --text:#ffffff;
+    --muted:#cbd5e1;
+    --border:rgba(255,255,255,.16);
+}
+
+body{
+    min-height:100vh;
+    color:var(--text);
+    background:
+    linear-gradient(135deg,rgba(2,6,23,.90),rgba(30,27,75,.82)),
+    url("https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=2000&q=85");
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+    transition:.4s;
+}
+
+/* ===== TOP ===== */
+
+header{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    padding:14px 20px;
+    background:rgba(2,6,23,.78);
+    backdrop-filter:blur(18px);
+    border-bottom:1px solid var(--border);
+}
+
+.developer{
+    text-align:center;
+    font-weight:900;
+    letter-spacing:4px;
+    font-size:17px;
+    margin-bottom:10px;
+    color:#fff;
+    text-shadow:
+        0 0 7px #06b6d4,
+        0 0 15px #7c3aed,
+        0 0 28px #7c3aed;
+    animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+    from{opacity:.75;}
+    to{opacity:1;}
+}
+
+.header{
+    max-width:1350px;
+    margin:auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+}
+
+.logo{
+    font-size:23px;
+    font-weight:900;
+}
+
+.logo span{
+    color:#67e8f9;
+}
+
+.controls{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+button{
+    border:0;
+    cursor:pointer;
+    transition:.2s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+}
+
+.small-btn{
+    padding:9px 13px;
+    border-radius:10px;
+    color:#fff;
+    background:rgba(255,255,255,.10);
+    border:1px solid var(--border);
+}
+
+.small-btn:hover{
+    background:var(--primary);
+}
+
+/* ===== MAIN ===== */
+
+.container{
+    max-width:1350px;
+    margin:auto;
+    padding:25px;
+}
+
+/* ===== HERO ===== */
+
+.hero{
+    position:relative;
+    overflow:hidden;
+    padding:35px;
+    margin-bottom:25px;
+    border-radius:28px;
+    background:
+        linear-gradient(135deg,
+        rgba(124,58,237,.82),
+        rgba(6,182,212,.50));
+    border:1px solid rgba(255,255,255,.22);
+    box-shadow:0 20px 60px rgba(0,0,0,.30);
+}
+
+.hero:after{
+    content:"";
+    position:absolute;
+    width:250px;
+    height:250px;
+    border-radius:50%;
+    right:-70px;
+    top:-100px;
+    background:rgba(255,255,255,.12);
+}
+
+.hero h1{
+    font-size:36px;
+    margin-bottom:10px;
+}
+
+.hero p{
+    color:#e2e8f0;
+    line-height:1.6;
+}
+
+/* ===== STATS ===== */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.stat{
+    padding:20px;
+    border-radius:20px;
+    background:var(--card);
+    border:1px solid var(--border);
+    backdrop-filter:blur(15px);
+}
+
+.stat-icon{
+    font-size:25px;
+}
+
+.stat p{
+    color:var(--muted);
+    margin-top:7px;
+}
+
+.stat h3{
+    font-size:28px;
+    margin-top:7px;
+}
+
+/* ===== GRID ===== */
+
+.grid{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:20px;
+}
+
+.card{
+    padding:21px;
+    margin-bottom:20px;
+    border-radius:22px;
+    background:var(--card);
+    border:1px solid var(--border);
+    backdrop-filter:blur(16px);
+    box-shadow:0 10px 35px rgba(0,0,0,.15);
+}
+
+.card h2{
+    margin-bottom:16px;
+}
+
+/* ===== TABS ===== */
+
+.tabs{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:8px;
+    margin-bottom:12px;
+}
+
+.tab{
+    flex:0 0 auto;
+    padding:10px 17px;
+    border-radius:22px;
+    color:#fff;
+    background:rgba(255,255,255,.09);
+    border:1px solid var(--border);
+}
+
+.tab.active{
+    background:linear-gradient(90deg,var(--primary),var(--secondary));
+}
+
+/* ===== CLASSES ===== */
+
+.class-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:15px;
+    margin-bottom:10px;
+    border-radius:15px;
+    background:rgba(255,255,255,.065);
+    border-left:4px solid var(--secondary);
+}
+
+.class-info strong{
+    display:block;
+    font-size:17px;
+    margin-bottom:6px;
+}
+
+.class-info small{
+    color:var(--muted);
+    line-height:1.6;
+}
+
+/* ===== FORM ===== */
+
+.form{
+    display:grid;
+    gap:10px;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:12px 13px;
+    color:#fff;
+    background:rgba(255,255,255,.09);
+    border:1px solid var(--border);
+    border-radius:11px;
+    outline:none;
+}
+
+select option{
+    color:#111;
+}
+
+textarea{
+    min-height:130px;
+    resize:vertical;
+}
+
+input::placeholder,
+textarea::placeholder{
+    color:#cbd5e1;
+}
+
+.primary{
+    width:100%;
+    padding:13px;
+    color:#fff;
+    font-weight:800;
+    border-radius:11px;
+    background:linear-gradient(90deg,var(--primary),var(--secondary));
+}
+
+/* ===== TASKS ===== */
+
+.todo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:11px;
+    margin-bottom:8px;
+    border-radius:12px;
+    background:rgba(255,255,255,.07);
+}
+
+.todo input{
+    width:18px;
+    height:18px;
+}
+
+.todo span{
+    flex:1;
+}
+
+.todo.completed{
+    opacity:.48;
+    text-decoration:line-through;
+}
+
+/* ===== TIMER ===== */
+
+.timer{
+    text-align:center;
+}
+
+.timer-display{
+    font-size:55px;
+    font-weight:900;
+    margin:18px 0;
+    letter-spacing:3px;
+}
+
+.timer button{
+    padding:10px 16px;
+    margin:3px;
+    color:#fff;
+    border-radius:10px;
+    background:var(--primary);
+}
+
+/* ===== PROGRESS ===== */
+
+.progress{
+    width:100%;
+    height:13px;
+    overflow:hidden;
+    margin-top:12px;
+    border-radius:20px;
+    background:rgba(255,255,255,.12);
+}
+
+.progress-bar{
+    width:0;
+    height:100%;
+    background:linear-gradient(90deg,var(--primary),var(--secondary));
+    transition:.4s;
+}
+
+/* ===== UPCOMING ===== */
+
+.upcoming-box{
+    padding:15px;
+    border-radius:15px;
+    background:rgba(255,255,255,.07);
+    line-height:1.8;
+}
+
+/* ===== SETTINGS ===== */
+
+.settings{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:2000;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(0,0,0,.75);
+}
+
+.settings-box{
+    width:100%;
+    max-width:520px;
+    max-height:90vh;
+    overflow:auto;
+    padding:25px;
+    border-radius:22px;
+    background:#111827;
+    border:1px solid var(--border);
+}
+
+.settings-box h2{
+    margin-bottom:20px;
+}
+
+.setting-label{
+    display:block;
+    margin:13px 0 7px;
+    color:#e2e8f0;
+}
+
+.theme-buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:10px 0 18px;
+}
+
+.theme{
+    width:70px;
+    height:42px;
+    border-radius:10px;
+    border:2px solid white;
+}
+
+/* ===== DAY SUMMARY ===== */
+
+.summary-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+
+.summary{
+    padding:13px;
+    border-radius:13px;
+    background:rgba(255,255,255,.07);
+}
+
+.summary strong{
+    display:block;
+    font-size:20px;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media(max-width:950px){
+    .grid{
+        grid-template-columns:1fr;
+    }
+
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:600px){
+    header{
+        padding:12px;
+    }
+
+    .header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .container{
+        padding:14px;
+    }
+
+    .hero{
+        padding:25px;
+    }
+
+    .hero h1{
+        font-size:27px;
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .stat{
+        padding:15px;
+    }
+
+    .stat h3{
+        font-size:22px;
+    }
+
+    .developer{
+        font-size:14px;
+        letter-spacing:3px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+
+<header>
+
+<div class="developer">
+    DEVELOPER AKKI
+</div>
+
+<div class="header">
+
+    <div class="logo">
+        🎓 <span id="plannerTitle">B.Tech</span> Smart Planner
+    </div>
+
+    <div class="controls">
+        <button class="small-btn" onclick="toggleDarkMode()">
+            🌙 Mode
+        </button>
+
+        <button class="small-btn" onclick="openSettings()">
+            ⚙️ Customize
+        </button>
+    </div>
+
+</div>
+</header>
+
+
+<!-- ================= MAIN ================= -->
+
+<main class="container">
+
+<!-- HERO -->
+
+<section class="hero">
+
+<h1 id="greeting">
+Good Morning, Student 👋
+</h1>
+
+<p id="date"></p>
+
+<p>
+Organize your classes, assignments, study sessions and goals
+from one smart dashboard.
+</p>
+
+</section>
+
+
+<!-- ================= STATS ================= -->
+
+<section class="stats">
+
+<div class="stat">
+<div class="stat-icon">📚</div>
+<p>Today's Classes</p>
+<h3 id="classCount">0</h3>
+</div>
+
+<div class="stat">
+<div class="stat-icon">✅</div>
+<p>Tasks Completed</p>
+<h3 id="taskCount">0</h3>
+</div>
+
+<div class="stat">
+<div class="stat-icon">🔥</div>
+<p>Study Streak</p>
+<h3 id="streak">1 Day</h3>
+</div>
+
+<div class="stat">
+<div class="stat-icon">🎯</div>
+<p>Task Progress</p>
+<h3 id="progressText">0%</h3>
+</div>
+
+</section>
+
+
+<div class="grid">
+
+<!-- ================= LEFT ================= -->
+
+<div>
+
+<!-- TIMETABLE -->
+
+<div class="card">
+
+<h2>📅 Weekly Class Schedule</h2>
+
+<div class="tabs" id="dayTabs"></div>
+
+<div id="schedule"></div>
+
+</div>
+
+
+<!-- ADD CLASS -->
+
+<div class="card">
+
+<h2>➕ Add Class</h2>
+
+<div class="form">
+
+<select id="classDay">
+<option>Monday</option>
+<option>Tuesday</option>
+<option>Wednesday</option>
+<option>Thursday</option>
+<option>Friday</option>
+<option>Saturday</option>
+<option>Sunday</option>
+</select>
+
+<input
+id="subject"
+placeholder="Subject name e.g. Data Structures">
+
+<input
+id="teacher"
+placeholder="Teacher name">
+
+<input
+id="room"
+placeholder="Room / Lab">
+
+<input
+id="time"
+type="time">
+
+<input
+id="duration"
+type="number"
+placeholder="Class duration in minutes e.g. 60"
+value="60">
+
+<button class="primary" onclick="addClass()">
+➕ Add Class
+</button>
+
+</div>
+
+</div>
+
+
+<!-- TASKS -->
+
+<div class="card">
+
+<h2>✅ Today's Tasks</h2>
+
+<div class="form">
+
+<input
+id="taskInput"
+placeholder="Example: Complete DBMS assignment">
+
+<select id="priority">
+<option value="Low">🟢 Low Priority</option>
+<option value="Medium">🟡 Medium Priority</option>
+<option value="High">🔴 High Priority</option>
+</select>
+
+<button class="primary" onclick="addTask()">
+➕ Add Task
+</button>
+
+</div>
+
+<div id="tasks" style="margin-top:16px"></div>
+
+</div>
+
+
+<!-- NOTES -->
+
+<div class="card">
+
+<h2>📝 Quick Notes</h2>
+
+<textarea
+id="notes"
+placeholder="Write important study notes, reminders or ideas here..."></textarea>
+
+<button
+class="primary"
+style="margin-top:10px"
+onclick="saveNotes()">
+
+💾 Save Notes
+
+</button>
+
+</div>
+
+
+<!-- WEEK SUMMARY -->
+
+<div class="card">
+
+<h2>📊 Weekly Overview</h2>
+
+<div class="summary-grid" id="weeklySummary"></div>
+
+</div>
+
+</div>
+
+
+<!-- ================= RIGHT ================= -->
+
+<div>
+
+<!-- POMODORO -->
+
+<div class="card timer">
+
+<h2>⏱️ Focus Timer</h2>
+
+<p style="color:var(--muted)">
+25-minute Pomodoro session
+</p>
+
+<div class="timer-display" id="timer">
+25:00
+</div>
+
+<button onclick="startTimer()">▶ Start</button>
+
+<button onclick="pauseTimer()">⏸ Pause</button>
+
+<button onclick="resetTimer()">↻ Reset</button>
+
+</div>
+
+
+<!-- GOALS -->
+
+<div class="card">
+
+<h2>🎯 Weekly Study Goal</h2>
+
+<p style="color:var(--muted)">
+Complete your study sessions.
+</p>
+
+<div class="progress">
+<div class="progress-bar" id="goalBar"></div>
+</div>
+
+<p style="margin-top:10px">
+<strong id="goalPercent">0</strong>% completed
+</p>
+
+<button
+class="primary"
+style="margin-top:12px"
+onclick="increaseGoal()">
+
+📚 Complete Study Session
+
+</button>
+
+</div>
+
+
+<!-- UPCOMING -->
+
+<div class="card">
+
+<h2>🔔 Upcoming Class</h2>
+
+<div class="upcoming-box" id="upcoming">
+No upcoming class.
+</div>
+
+</div>
+
+
+<!-- BRANCH -->
+
+<div class="card">
+
+<h2>🎓 B.Tech Branch</h2>
+
+<select id="branch" onchange="changeBranch()">
+
+<option value="CSE">
+CSE — Computer Science
+</option>
+
+<option value="ECE">
+ECE — Electronics & Communication
+</option>
+
+<option value="EL">
+EL — Electrical Engineering
+</option>
+
+<option value="CV">
+CV — Civil Engineering
+</option>
+
+</select>
+
+<p
+id="branchInfo"
+style="margin-top:14px;color:var(--muted);line-height:1.6">
+Computer Science Engineering
+</p>
+
+</div>
+
+
+<!-- QUICK INFO -->
+
+<div class="card">
+
+<h2>💡 Smart Tips</h2>
+
+<p style="line-height:1.9;color:var(--muted)">
+📌 Review today's classes after college.<br>
+📌 Complete high-priority assignments first.<br>
+📌 Use the Pomodoro timer for focused study.<br>
+📌 Keep your weekly timetable updated.<br>
+📌 Track your progress every day.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</main>
+
+
+<!-- ================= SETTINGS ================= -->
+
+<div class="settings" id="settings">
+
+<div class="settings-box">
+
+<h2>⚙️ Customize Planner</h2>
+
+<label class="setting-label">
+Planner Name
+</label>
+
+<input
+id="plannerName"
+placeholder="My Smart Planner">
+
+
+<label class="setting-label">
+Background Image URL
+</label>
+
+<input
+id="background"
+placeholder="Paste an image URL">
+
+
+<label class="setting-label">
+Custom Primary Color
+</label>
+
+<input
+id="primaryColor"
+type="color"
+value="#7c3aed">
+
+
+<label class="setting-label">
+Custom Secondary Color
+</label>
+
+<input
+id="secondaryColor"
+type="color"
+value="#06b6d4">
+
+
+<h3 style="margin-top:20px">
+🎨 Quick Themes
+</h3>
+
+<div class="theme-buttons">
+
+<button
+class="theme"
+style="background:linear-gradient(135deg,#7c3aed,#06b6d4)"
+onclick="setTheme('#7c3aed','#06b6d4')">
+</button>
+
+<button
+class="theme"
+style="background:linear-gradient(135deg,#2563eb,#06b6d4)"
+onclick="setTheme('#2563eb','#06b6d4')">
+</button>
+
+<button
+class="theme"
+style="background:linear-gradient(135deg,#ec4899,#f97316)"
+onclick="setTheme('#ec4899','#f97316')">
+</button>
+
+<button
+class="theme"
+style="background:linear-gradient(135deg,#16a34a,#22c55e)"
+onclick="setTheme('#16a34a','#22c55e')">
+</button>
+
+<button
+class="theme"
+style="background:linear-gradient(135deg,#dc2626,#f59e0b)"
+onclick="setTheme('#dc2626','#f59e0b')">
+</button>
+
+</div>
+
+
+<button
+class="primary"
+onclick="saveSettings()">
+
+💾 Save Customization
+
+</button>
+
+<button
+class="small-btn"
+style="width:100%;margin-top:10px"
+onclick="closeSettings()">
+
+Close
+
+</button>
+
+</div>
+</div>
+
+
+<script>
+
+/* =====================================================
+   SMART B.TECH STUDY PLANNER
+   DEVELOPER AKKI
+===================================================== */
+
+
+/* ================= DATA ================= */
+
+let classes =
+JSON.parse(localStorage.getItem("btech_classes")) || {
+
+    Monday:[],
+    Tuesday:[],
+    Wednesday:[],
+    Thursday:[],
+    Friday:[],
+    Saturday:[],
+    Sunday:[]
+
+};
+
+let tasks =
+JSON.parse(localStorage.getItem("btech_tasks")) || [];
+
+let goal =
+Number(localStorage.getItem("btech_goal")) || 0;
+
+let streak =
+Number(localStorage.getItem("btech_streak")) || 1;
+
+
+/* ================= DAYS ================= */
+
+const days=[
+"Monday",
+"Tuesday",
+"Wednesday",
+"Thursday",
+"Friday",
+"Saturday",
+"Sunday"
+];
+
+let todayIndex=new Date().getDay();
+
+let selectedDay=
+days[todayIndex-1] || "Monday";
+
+
+/* ================= DATE ================= */
+
+function updateDate(){
+
+let now=new Date();
+
+document.getElementById("date").innerText=
+now.toLocaleDateString("en-IN",{
+weekday:"long",
+year:"numeric",
+month:"long",
+day:"numeric"
+});
+
+let hour=now.getHours();
+
+let greeting="Good Evening";
+
+if(hour<12)
+greeting="Good Morning";
+
+else if(hour<17)
+greeting="Good Afternoon";
+
+document.getElementById("greeting").innerText=
+greeting+", Student 👋";
+
+}
+
+
+/* ================= TABS ================= */
+
+function createTabs(){
+
+let box=
+document.getElementById("dayTabs");
+
+box.innerHTML="";
+
+days.forEach(day=>{
+
+let button=
+document.createElement("button");
+
+button.className="tab";
+
+if(day===selectedDay)
+button.classList.add("active");
+
+button.innerText=day.substring(0,3);
+
+button.onclick=function(){
+
+selectedDay=day;
+
+createTabs();
+
+renderSchedule();
+
+};
+
+box.appendChild(button);
+
+});
+
+}
+
+
+/* ================= SCHEDULE ================= */
+
+function renderSchedule(){
+
+let box=
+document.getElementById("schedule");
+
+box.innerHTML="";
+
+let list=
+classes[selectedDay] || [];
+
+document.getElementById("classCount").innerText=
+classes[getTodayName()]?.length || 0;
+
+
+if(list.length===0){
+
+box.innerHTML=`
+<p style="color:var(--muted)">
+No classes scheduled for ${selectedDay} 🎉
+</p>`;
+
+updateUpcoming();
+
+return;
+
+}
+
+
+list.sort((a,b)=>
+a.time.localeCompare(b.time)
+);
+
+
+list.forEach((c,index)=>{
+
+let div=
+document.createElement("div");
+
+div.className="class-item";
+
+div.innerHTML=`
+
+<div class="class-info">
+
+<strong>
+${escapeHTML(c.subject)}
+</strong>
+
+<small>
+⏰ ${c.time}
+&nbsp; • &nbsp;
+👨‍🏫 ${escapeHTML(c.teacher || "Not specified")}
+&nbsp; • &nbsp;
+🏫 ${escapeHTML(c.room || "Not specified")}
+&nbsp; • &nbsp;
+⌛ ${c.duration || 60} min
+</small>
+
+</div>
+
+<button
+class="small-btn"
+onclick="deleteClass(${index})">
+❌
+</button>
+
+`;
+
+box.appendChild(div);
+
+});
+
+updateUpcoming();
+
+renderWeeklySummary();
+
+}
+
+
+/* ================= ADD CLASS ================= */
+
+function addClass(){
+
+let day=
+document.getElementById("classDay").value;
+
+let subject=
+document.getElementById("subject").value.trim();
+
+let teacher=
+document.getElementById("teacher").value.trim();
+
+let room=
+document.getElementById("room").value.trim();
+
+let time=
+document.getElementById("time").value;
+
+let duration=
+document.getElementById("duration").value || 60;
+
+
+if(!subject){
+
+alert("Please enter the subject name.");
+
+return;
+
+}
+
+if(!time){
+
+alert("Please select class time.");
+
+return;
+
+}
+
+
+classes[day].push({
+
+subject:subject,
+
+teacher:teacher,
+
+room:room,
+
+time:time,
+
+duration:duration
+
+});
+
+
+saveClasses();
+
+
+document.getElementById("subject").value="";
+document.getElementById("teacher").value="";
+document.getElementById("room").value="";
+document.getElementById("time").value="";
+
+
+selectedDay=day;
+
+createTabs();
+
+renderSchedule();
+
+alert("Class added successfully 📚");
+
+}
+
+
+/* ================= DELETE CLASS ================= */
+
+function deleteClass(index){
+
+if(!confirm("Delete this class?"))
+return;
+
+classes[selectedDay].splice(index,1);
+
+saveClasses();
+
+renderSchedule();
+
+}
+
+
+/* ================= SAVE CLASSES ================= */
+
+function saveClasses(){
+
+localStorage.setItem(
+"btech_classes",
+JSON.stringify(classes)
+);
+
+}
+
+
+/* ================= TASKS ================= */
+
+function addTask(){
+
+let input=
+document.getElementById("taskInput");
+
+let text=
+input.value.trim();
+
+let priority=
+document.getElementById("priority").value;
+
+
+if(!text)
+return;
+
+
+tasks.push({
+
+text:text,
+
+priority:priority,
+
+completed:false,
+
+date:new Date().toISOString()
+
+});
+
+
+localStorage.setItem(
+"btech_tasks",
+JSON.stringify(tasks)
+);
+
+
+input.value="";
+
+renderTasks();
+
+}
+
+
+/* ================= RENDER TASKS ================= */
+
+function renderTasks(){
+
+let box=
+document.getElementById("tasks");
+
+box.innerHTML="";
+
+let completed=0;
+
+
+tasks.forEach((task,index)=>{
+
+if(task.completed)
+completed++;
+
+
+let div=
+document.createElement("div");
+
+div.className="todo";
+
+
+if(task.completed)
+div.classList.add("completed");
+
+
+let priorityIcon=
+task.priority==="High"
+?"🔴":
+task.priority==="Medium"
+?"🟡":"🟢";
+
+
+div.innerHTML=`
+
+<input
+type="checkbox"
+${task.completed?"checked":""}
+onchange="toggleTask(${index})">
+
+<span>
+${priorityIcon}
+${escapeHTML(task.text)}
+</span>
+
+<button
+class="small-btn"
+onclick="deleteTask(${index})">
+❌
+</button>
+
+`;
+
+
+box.appendChild(div);
+
+});
+
+
+document.getElementById("taskCount")
+.innerText=completed;
+
+updateProgress();
+
+}
+
+
+/* ================= TASK COMPLETE ================= */
+
+function toggleTask(index){
+
+tasks[index].completed=
+!tasks[index].completed;
+
+localStorage.setItem(
+"btech_tasks",
+JSON.stringify(tasks)
+);
+
+renderTasks();
+
+}
+
+
+/* ================= DELETE TASK ================= */
+
+function deleteTask(index){
+
+tasks.splice(index,1);
+
+localStorage.setItem(
+"btech_tasks",
+JSON.stringify(tasks)
+);
+
+renderTasks();
+
+}
+
+
+/* ================= PROGRESS ================= */
+
+function updateProgress(){
+
+let completed=
+tasks.filter(t=>t.completed).length;
+
+let total=tasks.length;
+
+let percent=
+total===0
+?0
+:Math.round((completed/total)*100);
+
+
+document.getElementById("progressText")
+.innerText=percent+"%";
+
+}
+
+
+/* ================= WEEKLY SUMMARY ================= */
+
+function renderWeeklySummary(){
+
+let box=
+document.getElementById("weeklySummary");
+
+box.innerHTML="";
+
+
+days.forEach(day=>{
+
+let count=
+classes[day]?.length || 0;
+
+let div=
+document.createElement("div");
+
+div.className="summary";
+
+div.innerHTML=`
+
+<strong>${count}</strong>
+
+<span style="color:var(--muted)">
+${day} classes
+</span>
+
+`;
+
+box.appendChild(div);
+
+});
+
+}
+
+
+/* ================= UPCOMING CLASS ================= */
+
+function updateUpcoming(){
+
+let today=
+getTodayName();
+
+let now=new Date();
+
+let currentTime=
+String(now.getHours()).padStart(2,"0")
++
+":"+
+String(now.getMinutes()).padStart(2,"0");
+
+
+let list=
+classes[today] || [];
+
+
+let upcoming=
+list
+.filter(c=>c.time>=currentTime)
+.sort((a,b)=>
+a.time.localeCompare(b.time)
+);
+
+
+let box=
+document.getElementById("upcoming");
+
+
+if(upcoming.length){
+
+let c=upcoming[0];
+
+box.innerHTML=`
+
+<strong>
+📚 ${escapeHTML(c.subject)}
+</strong>
+
+<br>
+
+⏰ ${c.time}
+
+<br>
+
+👨‍🏫 ${escapeHTML(c.teacher || "Teacher not added")}
+
+<br>
+
+🏫 ${escapeHTML(c.room || "Room not added")}
+
+<br>
+
+⌛ ${c.duration || 60} minutes
+
+`;
+
+}else{
+
+box.innerHTML=
+"No more classes today 🎉";
+
+}
+
+}
+
+
+/* ================= TODAY ================= */
+
+function getTodayName(){
+
+let index=
+new Date().getDay();
+
+return days[index-1] || "Sunday";
+
+}
+
+
+/* ================= NOTES ================= */
+
+document.getElementById("notes").value=
+localStorage.getItem("btech_notes") || "";
+
+
+function saveNotes(){
+
+localStorage.setItem(
+"btech_notes",
+document.getElementById("notes").value
+);
+
+alert("Notes saved successfully 📝");
+
+}
+
+
+/* ================= BRANCH ================= */
+
+function changeBranch(){
+
+let branch=
+document.getElementById("branch").value;
+
+let info={
+
+CSE:
+"Computer Science Engineering — DSA, DBMS, Operating Systems, Computer Networks, Programming & AI.",
+
+ECE:
+"Electronics & Communication — Digital Electronics, Signals, Communication Systems, Microprocessors & VLSI.",
+
+EL:
+"Electrical Engineering — Circuits, Electrical Machines, Power Systems, Control Systems & Power Electronics.",
+
+CV:
+"Civil Engineering — Structural Engineering, Surveying, Geotechnical, Transportation & Construction."
+
+};
+
+
+document.getElementById("branchInfo")
+.innerText=info[branch];
+
+localStorage.setItem(
+"btech_branch",
+branch
+);
+
+}
+
+
+/* ================= POMODORO ================= */
+
+let timerSeconds=1500;
+
+let timerInterval=null;
+
+
+function updateTimer(){
+
+let minutes=
+Math.floor(timerSeconds/60)
+.toString()
+.padStart(2,"0");
+
+let seconds=
+(timerSeconds%60)
+.toString()
+.padStart(2,"0");
+
+
+document.getElementById("timer")
+.innerText=
+minutes+":"+seconds;
+
+}
+
+
+function startTimer(){
+
+if(timerInterval)
+return;
+
+
+timerInterval=
+setInterval(()=>{
+
+if(timerSeconds>0){
+
+timerSeconds--;
+
+updateTimer();
+
+}else{
+
+clearInterval(timerInterval);
+
+timerInterval=null;
+
+alert(
+"🎉 Focus session complete! Take a short break."
+);
+
+increaseGoal();
+
+}
+
+},1000);
+
+}
+
+
+function pauseTimer(){
+
+clearInterval(timerInterval);
+
+timerInterval=null;
+
+}
+
+
+function resetTimer(){
+
+pauseTimer();
+
+timerSeconds=1500;
+
+updateTimer();
+
+}
+
+
+/* ================= GOAL ================= */
+
+function increaseGoal(){
+
+goal+=10;
+
+if(goal>100)
+goal=100;
+
+localStorage.setItem(
+"btech_goal",
+goal
+);
+
+updateGoal();
+
+}
+
+
+function updateGoal(){
+
+document.getElementById("goalBar")
+.style.width=goal+"%";
+
+document.getElementById("goalPercent")
+.innerText=goal;
+
+}
+
+
+/* ================= SETTINGS ================= */
+
+function openSettings(){
+
+document.getElementById("settings")
+.style.display="flex";
+
+}
+
+
+function closeSettings(){
+
+document.getElementById("settings")
+.style.display="none";
+
+}
+
+
+function setTheme(primary,secondary){
+
+document.documentElement
+.style.setProperty("--primary",primary);
+
+document.documentElement
+.style.setProperty("--secondary",secondary);
+
+document.getElementById("primaryColor")
+.value=primary;
+
+document.getElementById("secondaryColor")
+.value=secondary;
+
+
+localStorage.setItem(
+"btech_primary",
+primary
+);
+
+localStorage.setItem(
+"btech_secondary",
+secondary
+);
+
+}
+
+
+/* ================= SAVE SETTINGS ================= */
+
+function saveSettings(){
+
+let name=
+document.getElementById("plannerName")
+.value.trim();
+
+let bg=
+document.getElementById("background")
+.value.trim();
+
+let primary=
+document.getElementById("primaryColor")
+.value;
+
+let secondary=
+document.getElementById("secondaryColor")
+.value;
+
+
+if(name){
+
+document.getElementById("plannerTitle")
+.innerText=name;
+
+localStorage.setItem(
+"btech_name",
+name
+);
+
+}
+
+
+if(bg){
+
+document.body.style.backgroundImage=
+`
+linear-gradient(
+135deg,
+rgba(2,6,23,.90),
+rgba(30,27,75,.82)
+),
+url("${bg}")
+`;
+
+localStorage.setItem(
+"btech_background",
+bg
+);
+
+}
+
+
+setTheme(primary,secondary);
+
+closeSettings();
+
+alert("Customization saved successfully 🎨");
+
+}
+
+
+/* ================= DARK MODE ================= */
+
+function toggleDarkMode(){
+
+let light=
+localStorage.getItem("btech_light") === "true";
+
+
+if(!light){
+
+document.body.style.setProperty(
+"background-color",
+"#f8fafc"
+);
+
+document.body.style.color="#111827";
+
+localStorage.setItem(
+"btech_light",
+"true"
+);
+
+}else{
+
+document.body.style.color="white";
+
+localStorage.setItem(
+"btech_light",
+"false"
+);
+
+location.reload();
+
+}
+
+}
+
+
+/* ================= ESCAPE HTML ================= */
+
+function escapeHTML(text){
+
+return String(text)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+/* ================= LOAD SAVED SETTINGS ================= */
+
+function loadSettings(){
+
+let primary=
+localStorage.getItem("btech_primary");
+
+let secondary=
+localStorage.getItem("btech_secondary");
+
+let name=
+localStorage.getItem("btech_name");
+
+let bg=
+localStorage.getItem("btech_background");
+
+let branch=
+localStorage.getItem("btech_branch");
+
+
+if(primary && secondary){
+
+setTheme(primary,secondary);
+
+}
+
+
+if(name){
+
+document.getElementById("plannerTitle")
+.innerText=name;
+
+document.getElementById("plannerName")
+.value=name;
+
+}
+
+
+if(bg){
+
+document.body.style.backgroundImage=
+`
+linear-gradient(
+135deg,
+rgba(2,6,23,.90),
+rgba(30,27,75,.82)
+),
+url("${bg}")
+`;
+
+document.getElementById("background")
+.value=bg;
+
+}
+
+
+if(branch){
+
+document.getElementById("branch")
+.value=branch;
+
+changeBranch();
+
+}
+
+}
+
+
+/* ================= KEYBOARD SHORTCUT ================= */
+
+document.addEventListener(
+"keydown",
+function(event){
+
+if(event.ctrlKey && event.key==="s"){
+
+event.preventDefault();
+
+saveNotes();
+
+}
+
+});
+
+
+/* ================= INITIALIZE ================= */
+
+updateDate();
+
+createTabs();
+
+renderSchedule();
+
+renderTasks();
+
+updateGoal();
+
+updateTimer();
+
+loadSettings();
+
+renderWeeklySummary();
+
+setInterval(updateDate,60000);
+
+setInterval(updateUpcoming,30000);
+
+</script>
+
+</body>
+</html>            const [activeTab, setActiveTab] = useState('dashboard');
             const [branch, setBranch] = useState('CS');
             const [showBranchModal, setShowBranchModal] = useState(!localStorage.getItem('userBranch'));
             const [sidebarOpen, setSidebarOpen] = useState(true);
